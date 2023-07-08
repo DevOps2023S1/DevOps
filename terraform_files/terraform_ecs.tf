@@ -9,6 +9,26 @@ resource "aws_ecs_cluster" "production" {
   name = "production"
 }
 
+# Creación del grupo de seguridad
+resource "aws_security_group" "load_balancers" {
+  name        = "load_balancers_access"
+  description = "Security group for products service"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+}
+
 ########################################################
 ################ microservicio PRODUCTS ################
 ########################################################
@@ -85,7 +105,7 @@ resource "aws_lb" "products" {
   internal           = false
   load_balancer_type = "application"
   subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"]
-
+  security_groups    = [aws_security_group.load_balancers.id]
   tags = {
     Name = "products-alb"
   }
@@ -207,7 +227,7 @@ resource "aws_lb" "orders" {
   internal           = false
   load_balancer_type = "application"
   subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"] # Reemplaza con los IDs de las subredes existentes de tu VPC
-
+  security_groups    = [aws_security_group.load_balancers.id]
   tags = {
     Name = "orders-alb"
   }
@@ -325,7 +345,7 @@ resource "aws_lb" "shipping" {
   internal           = false
   load_balancer_type = "application"
   subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"]
-
+  security_groups    = [aws_security_group.load_balancers.id]
   tags = {
     Name = "shipping-alb"
   }
@@ -443,7 +463,7 @@ resource "aws_lb" "payments" {
   internal           = false
   load_balancer_type = "application"
   subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"]
-
+  security_groups    = [aws_security_group.load_balancers.id]
   tags = {
     Name = "payments-alb"
   }
