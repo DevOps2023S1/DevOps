@@ -40,8 +40,8 @@ resource "aws_ecs_task_definition" "products" {
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = "arn:aws:iam::187585600197:role/LabRole"
 
-  cpu    = "256"  # Asigna la cantidad de CPU en milicore
-  memory = "512"  # Asigna la cantidad de memoria en MiB
+  cpu    = "256"
+  memory = "512" 
 
   container_definitions = jsonencode([
     {
@@ -84,7 +84,7 @@ resource "aws_lb" "products" {
   name               = "products-alb"
   internal           = false
   load_balancer_type = "application"
-  subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"] # Reemplaza con los IDs de las subredes existentes de tu VPC
+  subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"]
 
   tags = {
     Name = "products-alb"
@@ -365,4 +365,122 @@ resource "aws_lb_target_group" "shipping" {
 # Salida con la URL del servicio
 output "shipping_service_url" {
   value = aws_lb.shipping.dns_name
+}
+
+########################################################
+################ microservicio PAYMENTS ################
+########################################################
+
+# Creación del grupo de seguridad
+resource "aws_security_group" "payments_sg" {
+  name        = "payments-sg"
+  description = "Security group for payments service"
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+  }
+}
+
+# Creación de la definición de la tarea de ECS
+resource "aws_ecs_task_definition" "payments" {
+  family                   = "payments"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  execution_role_arn       = "arn:aws:iam::187585600197:role/LabRole"
+
+  cpu    = "256" 
+  memory = "512" 
+
+  container_definitions = jsonencode([
+    {
+      name          = "payments"
+      image         = "187585600197.dkr.ecr.us-east-1.amazonaws.com/payments-service:test-1"
+      portMappings = [
+        {
+          containerPort = 8080,
+          hostPort      = 8080,
+          protocol      = "tcp"
+        }
+      ]
+    }
+  ])
+}
+
+# Creación del servicio de ECS
+resource "aws_ecs_service" "payments" {
+  name            = "payments"
+  cluster         = aws_ecs_cluster.production.id
+  task_definition = aws_ecs_task_definition.payments.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets         = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"]
+    security_groups = [aws_security_group.payments_sg.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.payments.arn
+    container_name   = "payments"
+    container_port   = 8080
+  }
+}
+
+# Creación del ALB (Application Load Balancer)
+resource "aws_lb" "payments" {
+  name               = "payments-alb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = ["subnet-036d2b225819bfb0a", "subnet-07dc0f066f2de4675"]
+
+  tags = {
+    Name = "payments-alb"
+  }
+}
+
+# Creación del listener del ALB
+resource "aws_lb_listener" "payments" {
+  load_balancer_arn = aws_lb.payments.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.payments.arn
+  }
+}
+
+# Creación del grupo de destino del ALB
+resource "aws_lb_target_group" "payments" {
+  name     = "payments-target-group"
+  port     = 8080
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id   = "vpc-0d93e90e894b1a396"  
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "404"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+  }
+}
+
+# Salida con la URL del servicio
+output "payments_service_url" {
+  value = aws_lb.payments.dns_name
 }
