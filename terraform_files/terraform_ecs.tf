@@ -187,7 +187,7 @@ resource "aws_ecs_task_definition" "orders" {
       name          = "orders"
       image         = "187585600197.dkr.ecr.us-east-1.amazonaws.com/orders-service:test-8" 
       environment   = [
-        { "name": "APP_ARGS", "value": "http://paymetns-url http://shipping-url http://products-url" }
+        { "name": "APP_ARGS", "value": "http://${aws_lb.payments.dns_name} http://${aws_lb.shipping.dns_name} http://${aws_lb.products.dns_name}" }
       ]
       portMappings = [
         {
