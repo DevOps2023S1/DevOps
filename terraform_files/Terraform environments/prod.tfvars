@@ -13,7 +13,7 @@ products_alb_name = "products-alb-prod"
 products_target_group_lb_name  = "products-target-group-prod"
 
 ### ORDER ###
-
+ecs_order_name = "orders-prod"
 order_sg_name = "order-sg-prod"
 order_family_ecs_task_definition = "order-prod"
 order_cpu = "256"
@@ -22,7 +22,7 @@ orders_alb_name = "products-alb-prod"
 orders_target_group_lb_name  = "orders-target-group-prod"
 
 ### SHIPPING ###
-
+ecs_shipping_name = "shipping-prod"
 shipping_sg_name = "shipping-sg-prod"
 shipping_family_ecs_task_definition = "shipping-prod"
 shipping_cpu = "256"
@@ -31,7 +31,7 @@ shipping_alb_name = "shipping-alb-prod"
 shipping_target_group_lb_name  = "shipping-target-group-prod"
 
 ### PAYMENTS ###
-
+ecs_payments_name = "payment-prod"
 payment_sg_name = "payment-sg-prod"
 payment_family_ecs_task_definition = "payment-prod"
 payment_cpu = "256"

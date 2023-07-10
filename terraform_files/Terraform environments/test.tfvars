@@ -13,25 +13,25 @@ products_alb_name = "products-alb-test"
 products_target_group_lb_name  = "products-target-group-test"
 
 ### ORDER ###
-
+ecs_order_name = "orders-test"
 order_sg_name = "order-sg-test"
 order_family_ecs_task_definition = "order-test"
 order_cpu = "256"
 order_memory = "512"
 orders_alb_name = "products-alb-testtt"
-orders_target_group_lb_name  = "orders-target-groupppp"
+orders_target_group_lb_name  = "orders-target-group"
 
 ### SHIPPING ###
-
+ecs_shipping_name = "shipping-test"
 shipping_sg_name = "shipping-sg-test"
 shipping_family_ecs_task_definition = "shipping-test"
 shipping_cpu = "256"
 shipping_memory = "512"
 shipping_alb_name = "shipping-alb-testtt"
-shipping_target_group_lb_name  = "shipping-target-groupppp"
+shipping_target_group_lb_name  = "shipping-target-group"
 
 ### PAYMENTS ###
-
+ecs_payments_name = "payment-test"
 payment_sg_name = "payment-sg-test"
 payment_family_ecs_task_definition = "payment-test"
 payment_cpu = "256"

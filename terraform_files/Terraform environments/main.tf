@@ -33,6 +33,21 @@ variable "ecs_product_name" {
   type        = string
 }
 
+variable "ecs_order_name" {
+  description = "Name of order ecs"
+  type        = string
+}
+
+variable "ecs_shipping_name" {
+  description = "Name of shipping ecs"
+  type        = string
+}
+
+variable "ecs_payments_name" {
+  description = "Name of payment ecs"
+  type        = string
+}
+
 variable "load_balancer_name" {
   description = "Name of load balancer"
   type        = string
@@ -365,7 +380,7 @@ resource "aws_ecs_task_definition" "orders" {
 
 # Creación del servicio de ECS
 resource "aws_ecs_service" "orders" {
-  name            = "orders"
+  name            = var.ecs_order_name
   cluster         = aws_ecs_cluster.production.id
   task_definition = aws_ecs_task_definition.orders.arn
   desired_count   = 1
@@ -484,7 +499,7 @@ resource "aws_ecs_task_definition" "shipping" {
 
 # Creación del servicio de ECS
 resource "aws_ecs_service" "shipping" {
-  name            = "shipping"
+  name            = var.ecs_shipping_name
   cluster         = aws_ecs_cluster.production.id
   task_definition = aws_ecs_task_definition.shipping.arn
   desired_count   = 1
@@ -603,7 +618,7 @@ resource "aws_ecs_task_definition" "payments" {
 
 # Creación del servicio de ECS
 resource "aws_ecs_service" "payments" {
-  name            = "payments"
+  name            = var.ecs_payments_name
   cluster         = aws_ecs_cluster.production.id
   task_definition = aws_ecs_task_definition.payments.arn
   desired_count   = 1
