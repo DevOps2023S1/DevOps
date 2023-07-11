@@ -1,181 +1,10 @@
-resource "aws_s3_bucket" "fronts-bucketttttt1" {
+resource "aws_s3_bucket" "fronts-bucket" {
   bucket = var.bucket_name
 
   tags = {
     Name        = var.bucket_tag_name
     Environment = var.bucket_tag_environment
   }
-}
-
-############## Variables ######################
-variable "bucket_name" {
-  description = "Name of front bucket "
-  type        = string
-}
-
-variable "bucket_tag_environment" {
-  description = "Environment of front bucket environment tag"
-  type        = string
-}
-
-variable "bucket_tag_name" {
-  description = "Name of bucket tag name"
-  type        = string
-}
-
-variable "cluster_name" {
-  description = "Name of cluster"
-  type        = string
-}
-
-variable "ecs_product_name" {
-  description = "Name of product ecs"
-  type        = string
-}
-
-variable "ecs_order_name" {
-  description = "Name of order ecs"
-  type        = string
-}
-
-variable "ecs_shipping_name" {
-  description = "Name of shipping ecs"
-  type        = string
-}
-
-variable "ecs_payments_name" {
-  description = "Name of payment ecs"
-  type        = string
-}
-
-variable "load_balancer_name" {
-  description = "Name of load balancer"
-  type        = string
-}
-
-variable "products_sg_name" {
-  description = "Name of product security_groups"
-  type        = string
-}
-
-variable "product_family_ecs_task_definition" {
-  description = "Family of product ecs"
-  type        = string
-}
-
-variable "product_cpu" {
-  description = "CPU product"
-  type        = string
-}
-
-variable "product_memory" {
-  description = "Memory product"
-  type        = string
-}
-variable "products_alb_name" {
-  description = "Products alb name"
-  type        = string
-}
-
-variable "products_target_group_lb_name" {
-  description = "Product target group name"
-  type        = string
-}
-
-variable "order_sg_name" {
-  description = "Name of order security_groups"
-  type        = string
-}
-
-variable "order_family_ecs_task_definition" {
-  description = "Family of order ecs"
-  type        = string
-}
-
-variable "order_cpu" {
-  description = "CPU order"
-  type        = string
-}
-
-
-variable "order_memory" {
-  description = "Memory order"
-  type        = string
-}
-
-variable "orders_alb_name" {
-  description = "Orders alb name"
-  type        = string
-}
-
-variable "orders_target_group_lb_name" {
-  description = "Orders target group name"
-  type        = string
-}
-
-
-
-variable "shipping_sg_name" {
-  description = "Name of shipping security_groups"
-  type        = string
-}
-
-variable "shipping_family_ecs_task_definition" {
-  description = "Family of shipping ecs"
-  type        = string
-}
-
-variable "shipping_cpu" {
-  description = "CPU shipping"
-  type        = string
-}
-
-
-variable "shipping_memory" {
-  description = "Memory shipping"
-  type        = string
-}
-
-variable "shipping_alb_name" {
-  description = "Shipping alb name"
-  type        = string
-}
-
-variable "shipping_target_group_lb_name" {
-  description = "Shipping target group name"
-  type        = string
-}
-
-
-variable "payment_sg_name" {
-  description = "Name of payment security_groups"
-  type        = string
-}
-
-variable "payment_family_ecs_task_definition" {
-  description = "Family of payment ecs"
-  type        = string
-}
-
-variable "payment_cpu" {
-  description = "CPU payment"
-  type        = string
-}
-
-
-variable "payment_memory" {
-  description = "Memory payment"
-  type        = string
-}
-
-variable "payment_alb_name" {
-  description = "Payment alb name"
-  type        = string
-}
-
-variable "payment_target_group_lb_name" {
-  description = "Payment target group name"
-  type        = string
 }
 
 #################################################################################################
@@ -243,7 +72,7 @@ resource "aws_ecs_task_definition" "products" {
 
   container_definitions = jsonencode([
     {
-      name          = "products"
+      name          = var.product_container_name
       image         = "187585600197.dkr.ecr.us-east-1.amazonaws.com/products-service:test-4"
       portMappings = [
         {
@@ -272,7 +101,7 @@ resource "aws_ecs_service" "products" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.products.arn
-    container_name   = "products"
+    container_name   = var.product_container_name
     container_port   = 8080
   }
 }
@@ -362,7 +191,7 @@ resource "aws_ecs_task_definition" "orders" {
 
   container_definitions = jsonencode([
     {
-      name          = "orders"
+      name          = var.order_container_name
       image         = "187585600197.dkr.ecr.us-east-1.amazonaws.com/orders-service:test-8" 
       environment   = [
         { "name": "APP_ARGS", "value": "http://${aws_lb.payments.dns_name} http://${aws_lb.shipping.dns_name} http://${aws_lb.products.dns_name}" }
@@ -394,7 +223,7 @@ resource "aws_ecs_service" "orders" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.orders.arn
-    container_name   = "orders"
+    container_name   = var.order_container_name
     container_port   = 8080
   }
 }
@@ -484,7 +313,7 @@ resource "aws_ecs_task_definition" "shipping" {
 
   container_definitions = jsonencode([
     {
-      name          = "shipping"
+      name          = var.shipping_container_name
       image         = "187585600197.dkr.ecr.us-east-1.amazonaws.com/shipping-service:test-2"
       portMappings = [
         {
@@ -513,7 +342,7 @@ resource "aws_ecs_service" "shipping" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.shipping.arn
-    container_name   = "shipping"
+    container_name   = var.shipping_container_name
     container_port   = 8080
   }
 }
@@ -603,7 +432,7 @@ resource "aws_ecs_task_definition" "payments" {
 
   container_definitions = jsonencode([
     {
-      name          = "payments"
+      name          = var.payment_container_name
       image         = "187585600197.dkr.ecr.us-east-1.amazonaws.com/payments-service:test-1"
       portMappings = [
         {
@@ -632,7 +461,7 @@ resource "aws_ecs_service" "payments" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.payments.arn
-    container_name   = "payments"
+    container_name   = var.payment_container_name
     container_port   = 8080
   }
 }
