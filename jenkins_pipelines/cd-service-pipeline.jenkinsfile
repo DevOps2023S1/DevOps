@@ -1,0 +1,122 @@
+pipeline {
+    agent any
+
+    environment {
+        serviceName = "${service_name}"
+    }
+
+    stages {
+        stage ("Seleccionar tipo de ambiente") {
+          steps {
+                script {
+                    env.RELEASE_TYPE = input message: 'Selección de ambiente', ok: 'Continuar',
+                            parameters: [choice(name: 'ambiente', choices: 'prod\ntest\ndev', description: 'Ambiente')]
+                }
+            } 
+        }
+        stage('Obtener imagenes disponibles') {
+            steps {
+                script {
+                    if (env.RELEASE_TYPE == 'prod') {
+                        env.AVAILABLE_VERSIONS = sh(script: "aws ecr describe-images --repository-name ${service_name} --query 'sort_by(imageDetails,& imagePushedAt)[*].imageTags' |  sed 's/^-//'| sed 's/^ *//' | sed 's/^-//' | sed 's/^ *//' | grep 'release' | tail -5", returnStdout: true).trim()
+                    }  else {
+                        env.AVAILABLE_VERSIONS = sh(script: "aws ecr describe-images --repository-name ${service_name} --query 'sort_by(imageDetails,& imagePushedAt)[*].imageTags' |  sed 's/^-//'| sed 's/^ *//' | sed 's/^-//' | sed 's/^ *//'", returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+        stage ("Seleccionar imagen y desplegar") {
+          steps {
+                script {
+                    env.IMAGE_DEPLOY = input message: 'Seleccionar imagen para desplegar', ok: 'Continuar',
+                            parameters: [choice(name: 'imagen', choices: env.AVAILABLE_VERSIONS, description: 'Imagen a desplegar')]
+                }
+            } 
+        }
+        stage("Crear task-definition") {
+            steps {
+                script {
+                    if (service_name == 'orders-service') {
+                        def paymentsURL = sh(
+                                                script: """
+                                                        aws elbv2 describe-load-balancers --names payments-service-alb-${env.RELEASE_TYPE} --query 'LoadBalancers[].DNSName' --output text
+                                                    """,
+                                                returnStdout: true
+                                            ).trim()
+                        def productsURL = sh(
+                                                script: """
+                                                        aws elbv2 describe-load-balancers --names products-service-alb-${env.RELEASE_TYPE} --query 'LoadBalancers[].DNSName' --output text
+                                                    """,
+                                                returnStdout: true
+                                            ).trim()
+                        def shippingURL = sh(
+                                                script: """
+                                                        aws elbv2 describe-load-balancers --names shipping-service-alb-${env.RELEASE_TYPE} --query 'LoadBalancers[].DNSName' --output text
+                                                    """,
+                                                returnStdout: true
+                                            ).trim()
+                        
+                        env.taskDefinitionARN = sh(
+                            script: """
+                                aws ecs register-task-definition \
+                                    --family \"${service_name}-${env.RELEASE_TYPE}\" \
+                                    --execution-role-arn arn:aws:iam::187585600197:role/LabRole \
+                                    --network-mode awsvpc \
+                                    --cpu 256 \
+                                    --memory 512 \
+                                    --container-definitions '[{
+                                        "name": \"${service_name}-${env.RELEASE_TYPE}\",
+                                        "image": \"187585600197.dkr.ecr.us-east-1.amazonaws.com/${service_name}:${env.IMAGE_DEPLOY}\",
+                                        "portMappings": [
+                                            {
+                                                "hostPort": 8080,
+                                                "containerPort": 8080
+                                            }
+                                        ],
+                                        "essential": true,
+                                        "environment": [
+                                            {
+                                                "name": "APP_ARGS",
+                                                "value": \"http://${paymentsURL} http://${shippingURL} http://${productsURL}\"
+                                            }
+                                        ]
+                                    }]' --output json | jq -r '.taskDefinition.taskDefinitionArn'
+                                """,
+                            returnStdout: true
+                        ).trim()
+                    }  else {
+                        env.taskDefinitionARN = sh(
+                            script: """
+                                aws ecs register-task-definition \
+                                    --family \"${service_name}-${env.RELEASE_TYPE}\" \
+                                    --execution-role-arn arn:aws:iam::187585600197:role/LabRole \
+                                    --network-mode awsvpc \
+                                    --cpu 256 \
+                                    --memory 512 \
+                                    --container-definitions '[{
+                                        "name": \"${service_name}-${env.RELEASE_TYPE}\",
+                                        "image": \"187585600197.dkr.ecr.us-east-1.amazonaws.com/${service_name}:${env.IMAGE_DEPLOY}\",
+                                        "portMappings": [
+                                            {
+                                                "hostPort": 8080,
+                                                "containerPort": 8080
+                                            }
+                                        ],
+                                        "essential": true
+                                    }]' --output json | jq -r '.taskDefinition.taskDefinitionArn'
+                                """,
+                            returnStdout: true
+                        ).trim()
+                    }
+                }
+            }
+        }
+        stage("Actualizar service ECS") {
+            steps {
+                script {
+                    sh "aws ecs update-service --cluster ${env.RELEASE_TYPE} --service  ${service_name}-${env.RELEASE_TYPE} --task-definition ${env.taskDefinitionARN}"
+                }
+            }
+        }
+    }
+}
