@@ -18,8 +18,12 @@ pipeline {
       stage('Build & Compile') {
           steps {
               dir('build') {
-                  sh "npm install"
-                  sh "npm run build"
+                  script {
+                      sh "npm install"
+                      sh "npm run build"
+                      versionTag = sh(script: '/var/lib/jenkins/image_versions.sh ${frontend-app} ${image_type}', returnStdout: true).trim()
+                      env.versionTag = versionTag
+                  }
               }         
           }
       }
@@ -27,7 +31,9 @@ pipeline {
           steps {
               script {
                   dir('build') {
-                      sh "aws s3 sync dist s3://bucket-frontend-devops-prod"
+                      sh "mkdir ${env.versionTag}"
+                      sh "cp -r dist/* ./${env.versionTag}"
+                      sh "aws s3 sync ${env.versionTag} s3://bucket-frontend-builded-versions/${env.versionTag}"
                   }  
               }       
           }
