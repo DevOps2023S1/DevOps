@@ -30,7 +30,7 @@ Una vez que finaliza el desarrollo, se creará un Pull Request hacia develop, qu
 Una vez aprobado, el creador de la funcionalidad, deberá mergear ese PR a develop y luego, realizar otro PR desde develop hacia master para que master, quede con todos los cambios realizados ya probados.  
 A continuación, mostramos un diagrama del flujo:  
 
-![Flujo Git](./documentacion/imágenes/diagrama_ramas_git.jpg)
+![Flujo Git](./documentacion/imagenes/diagrama_ramas_git.jpg)
 ---
 
 ## Microservicios
@@ -40,7 +40,7 @@ Con esto, obtenemos un sistema mucho más escalable, con un código más fácil 
 Otra ventaja de este tipo de arquitecturas, es que en caso de falla de uno de los microservicios, se vería afectada esa parte del sistema y no todo el aplicativo.  
 A continuación, un diagrama de cómo queda esta arquitectura para el caso planteado:
 
-![Diagrama de Microservicios](./documentacion/imágenes/diagrama-microservicios.jpg)
+![Diagrama de Microservicios](./documentacion/imagenes/diagrama-microservicios.jpg)
 
 ## Infraestructura
 Toda la infraestructura necesaria para alojar la aplicación se encuentra en Amazon Web Services (AWS).  
@@ -73,7 +73,7 @@ Nota: el flujo de los pipelines se detallará más adelante en este documento.
 
 A continuación, mostramos de forma más visual, el flujo comentado anteriormente: 
 
-![Diagrama de Flujo de Trabajo](./documentacion/imágenes/diagrama-flujo-trabajo.jpg)
+![Diagrama de Flujo de Trabajo](./documentacion/imagenes/diagrama-flujo-trabajo.jpg)
 
 ## Pipelines de Jenkins
 Para los ciclos de CI/CD, se optó por utilizar Jenkins como herramienta para este fin.  
@@ -86,7 +86,7 @@ Esta versión generada podrá ser desplegada mediante el pipeline de CD.
 El pipeline de CI, va ejecutando diferentes pasos uno a uno siempre y finalizará cunado todos los pasos se hayan ejecutado de forma correcta, o se verá interrumpido si uno de los pasos falla.  
 #### CI de microservicios
 El pipeline de CI para la creación de versiones de microservicios, consta de las siguientes etapas:
-![Diagrama de CI microservicios](./documentacion/imágenes/pipeline-ci-microservicios.jpg)  
+![Diagrama de CI microservicios](./documentacion/imagenes/pipeline-ci-microservicios.jpg)  
 Breve resumen de cada una: 
 - Clone: Se clona el repositorio del microservicio en cuestión.
 - Download dependencies: Se descargan las dependencias necesarias (con Maven) para luego hacer la compilación y build. 
@@ -99,7 +99,7 @@ Breve resumen de cada una:
 
 #### CI de frontend
 El pipeline de CD para la creación de versiones del frontend, consta, en tanto, de las siguientes etapas:
-![Diagrama de CI frontend](./documentacion/imágenes/pipeline-ci-frontend.jpg)  
+![Diagrama de CI frontend](./documentacion/imagenes/pipeline-ci-frontend.jpg)  
 Breve resumen de cada una: 
 - Clone: Se clona el repositorio de la app de frontend.
 - Build & Compile: se hace el build de la aplicación con Node. 
@@ -119,10 +119,10 @@ Lo anteriormente descrito, sucede para los microservicios y para la app de front
 
 #### CD de microservicios
 Al iniciar el pipeline, se solicitará que se seleccione cuál servicio se desea desplegar:  
-![CD microservicios selección de ambiente](./documentacion/imágenes/pipeline-cd-seleccion-servicio.jpg)  
+![CD microservicios selección de ambiente](./documentacion/imagenes/pipeline-cd-seleccion-servicio.jpg)  
 
 Una vez seleccionado el microservicio a desplegar, seguirán las siguientes etapas:  
-![Diagrama de CD microservicios](./documentacion/imágenes/pipeline-cd-microservicios.jpg)  
+![Diagrama de CD microservicios](./documentacion/imagenes/pipeline-cd-microservicios.jpg)  
 
 Breve detalle de cada etapa:  
 - Seleccionar tipo de ambiente: se muestra un combo box, para seleccionar el ambiente: dev, test o producción
@@ -136,7 +136,7 @@ Luego de unos minutos, el servicio de ECS, dejará disponible la nueva versión.
 #### CD de frontend
 El pipeline de CD de la app de frontend, funciona de una forma muy similar al de los microservicios.  
 
-![Diagrama de CD frontend](./documentacion/imágenes/pipeline-cd-frontend.jpg)  
+![Diagrama de CD frontend](./documentacion/imagenes/pipeline-cd-frontend.jpg)  
 
 Breve detalle de cada etapa:  
 - Seleccionar tipo de ambiente: se muestra un combo box, para seleccionar el ambiente: dev, test o producción
@@ -164,7 +164,7 @@ Estas herramientas, generan un reporte mostrando cuáles puntos son los que debe
 
 Si accedemos a la herramienta SonarCloud, vemos un dashboard en donde vemos un resumen de todas las aplicaciones:  
 
-![Dashboard SonarCloud](./documentacion/imágenes/sonar-cloud-dash.jpg)  
+![Dashboard SonarCloud](./documentacion/imagenes/sonar-cloud-dash.jpg)  
 
 Como se puede observar, Sonar advierte de algunos puntos de mejora: 
 - Code Smells (o sea, algunas estructuras o funciones que podrían ser mejoradas, eventualmente con algún de refactor en el código)
@@ -188,7 +188,7 @@ Estas pruebas se ejecutan en el paso "Ejecutar test en postman".
 Durante la ejecución del pipeline, puede verse el estado de estas pruebas en los logs del mismo.  
 
 Ejemplo para el servicio de productos:  
-![Tests Postman](./documentacion/imágenes/tests-postman.jpg)  
+![Tests Postman](./documentacion/imagenes/tests-postman.jpg)  
 
 Como se aprecia en la imagen, primeramente se levanta un contenedor en Docker con la versión generada.  
 Luego se ejecutan los tests de la colección de (Postman) utilizando "newman" como herramienta para ello. 
