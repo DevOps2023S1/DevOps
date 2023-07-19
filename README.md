@@ -2,6 +2,25 @@
 #### Realizado por Adrián Rodríguez [241708] y Gastón Sanguinetti [187831]
 ---
 
+  - [Descripción del problema](#descripción-del-problema)
+  - [Objetivo](#objetivo)
+  - [Git](#git)
+  - [Microservicios](#microservicios)
+  - [Infraestructura](#infraestructura)
+  - [Flujo de trabajo para una nueva funcionalidad](#flujo-de-trabajo-para-una-nueva-funcionalidad)
+  - [Pipelines de Jenkins](#pipelines-de-jenkins)
+    - [Pipelines de CI](#pipelines-de-ci)
+      - [CI de microservicios](#ci-de-microservicios)
+      - [CI de frontend](#ci-de-frontend)
+    - [Pipelines de CD](#pipelines-de-cd)
+      - [CD de microservicios](#cd-de-microservicios)
+      - [CD de frontend](#cd-de-frontend)
+  - [Test de aplicaciones](#test-de-aplicaciones)
+      - [Test unitarios (o unit tests):](#test-unitarios-o-unit-tests)
+      - [Análisis de código estatico:](#análisis-de-código-estatico)
+      - [Smoke Tests, o tests funcionales básicos](#smoke-tests-o-tests-funcionales-básicos)
+
+
 ## Descripción del problema
 Una empresa existente en el mercado del sector retail, nos plantea el desafío de modernizar la forma en la que desarrollan y realizan el delivery del software de la plataforma que utilizan internamente. 
 Para esto, surge la idea de implementar un modelo DevOps, que permita mejorar el fast time to market así como también, mejorar la calidad del código que desarrollan los colaboradores.
@@ -20,6 +39,7 @@ Para poder cumplir estos objetivos, nos apoyaremos en herramientas que nos permi
 - Generar repositorios de código que sigan los lineamientos para el buen trabajo en equipo y siguiendo una estructura de ramas que garanticen el orden y la facilidad de implementar nuevas features/fixes.
 
 ---
+
 ## Git
 Comenzaremos explicando el flujo de trabajo y estructura que tendrán los repositorios de código de Git.  
 
@@ -85,7 +105,7 @@ Los pipelines de CI, serán los encargados de empaquetar una aplicación (micros
 Esta versión generada podrá ser desplegada mediante el pipeline de CD.  
 El pipeline de CI, va ejecutando diferentes pasos uno a uno siempre y finalizará cunado todos los pasos se hayan ejecutado de forma correcta, o se verá interrumpido si uno de los pasos falla.  
 #### CI de microservicios
-El pipeline de CI para la creación de versiones de microservicios, consta de las siguientes etapas:
+El pipeline de CI para la creación de versiones de microservicios, consta de las siguientes etapas:  
 ![Diagrama de CI microservicios](./documentacion/imagenes/pipeline-ci-microservicios.jpg)  
 Breve resumen de cada una: 
 - Clone: Se clona el repositorio del microservicio en cuestión.
@@ -98,7 +118,7 @@ Breve resumen de cada una:
 - Push to AWS ECR Repository: se sube al repositorio de imágenes de AWS la imagen generada.
 
 #### CI de frontend
-El pipeline de CD para la creación de versiones del frontend, consta, en tanto, de las siguientes etapas:
+El pipeline de CD para la creación de versiones del frontend, consta, en tanto, de las siguientes etapas:  
 ![Diagrama de CI frontend](./documentacion/imagenes/pipeline-ci-frontend.jpg)  
 Breve resumen de cada una: 
 - Clone: Se clona el repositorio de la app de frontend.
