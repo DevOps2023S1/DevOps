@@ -16,9 +16,11 @@
       - [CD de microservicios](#cd-de-microservicios)
       - [CD de frontend](#cd-de-frontend)
   - [Test de aplicaciones](#test-de-aplicaciones)
-      - [Test unitarios (o unit tests):](#test-unitarios-o-unit-tests)
-      - [Análisis de código estatico:](#análisis-de-código-estatico)
+      - [Test unitarios (o unit tests)](#test-unitarios-o-unit-tests)
+      - [Análisis de código estatico](#análisis-de-código-estatico)
       - [Smoke Tests, o tests funcionales básicos](#smoke-tests-o-tests-funcionales-básicos)
+  - [Anexo](#anexo)
+      - [Tablero de Kanban](#tablero-de-kanban)
 
 
 ## Descripción del problema
@@ -214,3 +216,18 @@ Como se aprecia en la imagen, primeramente se levanta un contenedor en Docker co
 Luego se ejecutan los tests de la colección de (Postman) utilizando "newman" como herramienta para ello. 
 Se ve en pantalla el resultado del test, en este caso, se esperaba un 200, y ese fue el resultado, por lo que el pipeline sigue su curso.  
 Al final, se detiene el contenedor iniciado.
+
+## Anexo
+#### Tablero de Kanban
+Para llevar adelante el proceso de forma organizada, se utilizó un tablero de Kanban (apoyándonos en la herramienta web Trello) con 4 columnas:
+ - Backlog -> (lista de las tareas pendientes de realizar)
+ - WIP (Work in progress) -> (las tareas que se iban tomando y realizando durante el proyecto)
+ - Test (if requeries) -> (aquellas tareas que necesitaran tests previo a considerarlas como finalizadas, por si hubiera que hacer ajustes)
+ - Done -> (tareas finalizadas)
+
+A continuación, mostramos cómo fue evolucionando el tablero a medida que avanzó el proyecto:  
+![Trello 1](./documentacion/imagenes/trello-1.jpg)  
+![Trello 2](./documentacion/imagenes/trello-2.jpg)  
+![Trello 3](./documentacion/imagenes/trello-3.jpg)  
+![Trello 4](./documentacion/imagenes/trello-4.jpg)  
+
