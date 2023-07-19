@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    tools {
+        nodejs "node"
+    }
+    stages {
+      stage('Clone') {
+          steps {
+              echo 'Make the output directory'
+              sh 'mkdir -p build'
+        
+              echo 'Cloning files from (branch: "master")'
+              dir('build') {
+                  git branch: "master", credentialsId: 	"gitcredentials", url: "https://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@github.com/DevOps2023S1/frontend-app.git"
+              }      
+          }
+      }  
+      stage('Build & Compile') {
+          steps {
+              dir('build') {
+                  script {
+                      sh "npm install"
+                      sh "npm run build"
+                      versionTag = sh(script: '/var/lib/jenkins/image_versions.sh ${frontend-app} ${image_type}', returnStdout: true).trim()
+                      env.versionTag = versionTag
+                  }
+              }         
+          }
+      }
+      stage('Subiendo a S3 Bucket') {
+          steps {
+              script {
+                  dir('build') {
+                      sh "mkdir ${env.versionTag}"
+                      sh "cp -r dist/* ./${env.versionTag}"
+                      sh "aws s3 sync ${env.versionTag} s3://bucket-frontend-builded-versions/${env.versionTag}"
+                  }  
+              }       
+          }
+      } 
+    }
+}
