@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        serviceName = "${service_name}"
+    }
+
+    stages {
+        stage ("Seleccionar tipo de ambiente") {
+          steps {
+                script {
+                    env.RELEASE_TYPE = input message: 'Selección de ambiente', ok: 'Continuar',
+                            parameters: [choice(name: 'ambiente', choices: 'prod\ntest\ndev', description: 'Ambiente')]
+                }
+            } 
+        }
+        stage('Obtener imagenes disponibles') {
+            steps {
+                script {
+                    if (env.RELEASE_TYPE == 'prod') {
+                        env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://bucket-frontend-builded-versions/ | awk '{print \$2}' | sed 's/.\$//' |grep 'release' | tail -5", returnStdout: true).trim()
+                    }  else {
+                        env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://bucket-frontend-builded-versions/ | awk '{print \$2}' | sed 's/.\$//'", returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+        stage ("Seleccionar imagen y desplegar") {
+          steps {
+                script {
+                    env.IMAGE_DEPLOY = input message: 'Seleccionar imagen para desplegar', ok: 'Continuar',
+                            parameters: [choice(name: 'imagen', choices: env.AVAILABLE_VERSIONS, description: 'Imagen a desplegar')]
+                }
+            } 
+        }
+        stage("Descargar desde Repo S3") {
+            steps {
+                sh "rm -rf release-*"
+                sh "rm -rf test-*"
+                sh "mkdir ${env.IMAGE_DEPLOY}"
+                sh "aws s3 sync s3://bucket-frontend-builded-versions/${env.IMAGE_DEPLOY} ./${env.IMAGE_DEPLOY}"   
+            }
+        }
+        stage("Subir a S3") {
+            steps{
+                sh "cd ${env.IMAGE_DEPLOY}"
+                sh "aws s3 cp ${env.IMAGE_DEPLOY} s3://bucket-devops-frontend-${env.RELEASE_TYPE} --recursive"
+            }
+        }
+    }
+}
