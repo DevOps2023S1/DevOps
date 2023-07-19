@@ -1,0 +1,39 @@
+name: Ejecutando CI Pipeline en Jenkins
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  jenkins_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Invocando a Jenkins
+        id: jenkins
+        run: |
+          curl -X POST "http://ec2-23-22-162-149.compute-1.amazonaws.com:8080/job/ci-build-service/buildWithParameters?service_name=products-service&image_type=test&branch_name=${{github.head_ref}}&delay=0sec" --user "admin:11e5dc717eb1a0d1d7481aaa1b8c14754f"
+
+      - name: Progreso
+        run: |
+          echo "Esperando a finalizar el piepline..."
+          status="null"
+          echo $status
+          while [[ "$status" == "null" ]]; do
+            status=$(curl -s "http://ec2-23-22-162-149.compute-1.amazonaws.com:8080/job/ci-build-service/lastBuild/api/json" \
+              --user "admin:11e5dc717eb1a0d1d7481aaa1b8c14754f" \
+              | jq -r '.result')
+            sleep 10
+            
+            echo $status
+          done
+          if  [[ $status == "SUCCESS" ]]; 
+            then
+              echo "El job ha finalizado correctamente"
+              break
+            else
+              echo "Job error: $status"
+              exit 1
+          fi
