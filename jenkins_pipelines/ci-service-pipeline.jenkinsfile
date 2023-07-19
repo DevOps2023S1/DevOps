@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+    tools { 
+      maven 'Maven' 
+      jdk 'jdk8' 
+      nodejs "node"
+    }
+    environment {
+        serviceName = "${service_name}"
+        branchName = "${branch_name}"
+    }
+    stages {
+      stage('Clone') {
+          steps {
+              echo 'Make the output directory'
+              sh 'mkdir -p build'
+        
+              echo 'Cloning files from (branch: ${branchName})'
+              dir('build') {
+                  git branch: "${branch_name}", credentialsId: 	"gitcredentials", url: "https://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@github.com/DevOps2023S1/${serviceName}.git"
+              }        
+          }
+      } 
+      stage('Download dependencies') {
+          steps {
+              dir('build') {
+                  sh "mvn dependency:copy-dependencies"
+              }         
+          }
+      } 
+      stage('Build & Compile') {
+          steps {
+              dir('build') {
+                  sh "mvn clean install -DskipTests"
+              }         
+          }
+      } 
+      stage('Run unit tests') {
+          steps {
+              dir('build') {
+                  sh "mvn test"
+              }         
+          }
+      } 
+      stage('Sonar Analysis') {
+          steps {      
+            script {
+               def scannerHome = tool 'sonarscanner';
+                withSonarQubeEnv('SonarCloud') { 
+                    dir('build') {
+                    sh "${scannerHome}/bin/sonar-scanner  -Dsonar.projectKey=DevOps2023S1_${serviceName} -Dsonar.organization=devops2023s1 -Dsonar.java.binaries=target"
+                    }
+                }
+            }
+          }
+      } 
+      stage('Build docker image') {
+          steps {
+              script {
+                  dir('build') {
+                      versionTag = sh(script: '/var/lib/jenkins/image_versions.sh ${serviceName} ${image_type}', returnStdout: true).trim()
+                      env.versionTag = versionTag
+                      sh "docker build --build-arg JAR_FILE=./target/${serviceName}-example-0.0.1-SNAPSHOT-spring-boot.jar -t devops/${serviceName}:${versionTag} ."
+                      sh "docker build --build-arg JAR_FILE=./target/${serviceName}-example-0.0.1-SNAPSHOT-spring-boot.jar -t devops/${serviceName}:latest ."
+                  }  
+              }       
+          }
+      }
+      stage('Ejecutar test en Postman') {
+          steps {
+              script {
+                  dir('build') {
+                      sh "docker-compose up --build -d"
+                      sleep 10
+                      sh "newman run Tests.postman_collection.json"
+                      sh "docker-compose down"
+                  }  
+              }       
+          }
+          post {
+                failure {
+                    sh "docker-compose down"
+                }
+            }
+      } 
+      stage('Push to AWS ECR repository') {
+          steps {
+              sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 187585600197.dkr.ecr.us-east-1.amazonaws.com"
+              sh "docker tag devops/${serviceName}:${versionTag} 187585600197.dkr.ecr.us-east-1.amazonaws.com/${serviceName}:${versionTag}"
+              sh "docker push 187585600197.dkr.ecr.us-east-1.amazonaws.com/${serviceName}:${versionTag}"
+          }
+      } 
+    }
+}
