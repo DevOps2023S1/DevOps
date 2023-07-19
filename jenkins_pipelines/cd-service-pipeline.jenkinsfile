@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         serviceName = "${service_name}"
+        executionRole = "arn:aws:iam::279941515831:role/LabRole"
+        ecrRepoURL = "279941515831.dkr.ecr.us-east-1.amazonaws.com"
     }
 
     stages {
@@ -60,13 +62,13 @@ pipeline {
                             script: """
                                 aws ecs register-task-definition \
                                     --family \"${service_name}-${env.RELEASE_TYPE}\" \
-                                    --execution-role-arn arn:aws:iam::187585600197:role/LabRole \
+                                    --execution-role-arn \"${executionRole}\" \
                                     --network-mode awsvpc \
                                     --cpu 256 \
                                     --memory 512 \
                                     --container-definitions '[{
                                         "name": \"${service_name}-${env.RELEASE_TYPE}\",
-                                        "image": \"187585600197.dkr.ecr.us-east-1.amazonaws.com/${service_name}:${env.IMAGE_DEPLOY}\",
+                                        "image": \"${ecrRepoURL}/${service_name}:${env.IMAGE_DEPLOY}\",
                                         "portMappings": [
                                             {
                                                 "hostPort": 8080,
@@ -89,13 +91,13 @@ pipeline {
                             script: """
                                 aws ecs register-task-definition \
                                     --family \"${service_name}-${env.RELEASE_TYPE}\" \
-                                    --execution-role-arn arn:aws:iam::187585600197:role/LabRole \
+                                    --execution-role-arn \"${executionRole}\" \
                                     --network-mode awsvpc \
                                     --cpu 256 \
                                     --memory 512 \
                                     --container-definitions '[{
                                         "name": \"${service_name}-${env.RELEASE_TYPE}\",
-                                        "image": \"187585600197.dkr.ecr.us-east-1.amazonaws.com/${service_name}:${env.IMAGE_DEPLOY}\",
+                                        "image": \"${ecrRepoURL}/${service_name}:${env.IMAGE_DEPLOY}\",
                                         "portMappings": [
                                             {
                                                 "hostPort": 8080,

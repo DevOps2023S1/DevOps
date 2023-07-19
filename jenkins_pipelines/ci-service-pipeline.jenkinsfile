@@ -8,6 +8,7 @@ pipeline {
     environment {
         serviceName = "${service_name}"
         branchName = "${branch_name}"
+        ecrRepoURL = "279941515831.dkr.ecr.us-east-1.amazonaws.com"
     }
     stages {
       stage('Clone') {
@@ -70,8 +71,27 @@ pipeline {
           steps {
               script {
                   dir('build') {
+                      //si el build es de orders service, debemos descargar todos los otros servicios para poder levantarlos por la interdependencia de este con los otros
+                      if (serviceName == "orders-service"){
+                          sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ecrRepoURL}/payments-service"
+                          sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ecrRepoURL}/products-service"
+                          sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ecrRepoURL}/shipping-service"
+                          sh "docker pull ${ecrRepoURL}/payments-service:latest"
+                          sh "docker tag ${ecrRepoURL}/payments-service:latest devops/payments-service:latest"
+                          
+                          sh "docker pull ${ecrRepoURL}/products-service:latest"
+                          sh "docker tag ${ecrRepoURL}/products-service:latest devops/products-service:latest"
+                          
+                          sh "docker pull ${ecrRepoURL}/shipping-service:latest"
+                          sh "docker tag ${ecrRepoURL}/shipping-service:latest devops/shipping-service:latest"
+                      }
                       sh "docker-compose up --build -d"
-                      sleep 10
+                      // le damos unos segundos para que inicie el/los contenedores
+                      if (serviceName != "orders-service"){
+                          sleep 10
+                      } else {
+                          sleep 40
+                      }
                       sh "newman run Tests.postman_collection.json"
                       sh "docker-compose down"
                   }  
@@ -85,9 +105,11 @@ pipeline {
       } 
       stage('Push to AWS ECR repository') {
           steps {
-              sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 187585600197.dkr.ecr.us-east-1.amazonaws.com"
-              sh "docker tag devops/${serviceName}:${versionTag} 187585600197.dkr.ecr.us-east-1.amazonaws.com/${serviceName}:${versionTag}"
-              sh "docker push 187585600197.dkr.ecr.us-east-1.amazonaws.com/${serviceName}:${versionTag}"
+              sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ecrRepoURL}"
+              sh "docker tag devops/${serviceName}:${versionTag} ${ecrRepoURL}/${serviceName}:${versionTag}"
+              sh "docker push ${ecrRepoURL}/${serviceName}:${versionTag}"
+              sh "docker tag devops/${serviceName}:${versionTag} ${ecrRepoURL}/${serviceName}:latest"
+              sh "docker push ${ecrRepoURL}/${serviceName}:latest"
           }
       } 
     }
