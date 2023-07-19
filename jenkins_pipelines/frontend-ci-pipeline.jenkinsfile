@@ -9,9 +9,9 @@ pipeline {
               echo 'Make the output directory'
               sh 'mkdir -p build'
         
-              echo 'Cloning files from (branch: "master")'
+             echo 'Cloning files from (branch: ${branch_name})'
               dir('build') {
-                  git branch: "master", credentialsId: 	"gitcredentials", url: "https://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@github.com/DevOps2023S1/frontend-app.git"
+                  git branch: "${branch_name}", credentialsId: 	"gitcredentials", url: "https://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@github.com/DevOps2023S1/frontend-app.git"
               }      
           }
       }  
@@ -21,19 +21,33 @@ pipeline {
                   script {
                       sh "npm install"
                       sh "npm run build"
-                      versionTag = sh(script: '/var/lib/jenkins/image_versions.sh ${frontend-app} ${image_type}', returnStdout: true).trim()
+                      versionTag = sh(script: '/var/lib/jenkins/image_versions.sh frontend-app ${image_type}', returnStdout: true).trim()
                       env.versionTag = versionTag
                   }
               }         
           }
       }
+      stage('Sonar Analysis') {
+          steps {      
+            script {
+               def scannerHome = tool 'sonarscanner';
+                withSonarQubeEnv('SonarCloud') { 
+                    dir('build') {
+                    sh "${scannerHome}/bin/sonar-scanner  -Dsonar.projectKey=DevOps2023S1_frontend-app -Dsonar.organization=devops2023s1 -Dsonar.java.binaries=target"
+                    }
+                }
+            }
+          }
+      } 
       stage('Subiendo a S3 Bucket') {
           steps {
               script {
                   dir('build') {
+                      sh "rm -rf release-*"
+                      sh "rm -rf test-*"
                       sh "mkdir ${env.versionTag}"
                       sh "cp -r dist/* ./${env.versionTag}"
-                      sh "aws s3 sync ${env.versionTag} s3://bucket-frontend-builded-versions/${env.versionTag}"
+                      sh "aws s3 sync ${env.versionTag} s3://devops-frontend-builded-images-repo/${env.versionTag}"
                   }  
               }       
           }
