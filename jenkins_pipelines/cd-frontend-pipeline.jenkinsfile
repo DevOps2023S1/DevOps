@@ -10,7 +10,7 @@ pipeline {
           steps {
                 script {
                     env.RELEASE_TYPE = input message: 'Selección de ambiente', ok: 'Continuar',
-                            parameters: [choice(name: 'ambiente', choices: 'prod\ntest\ndev', description: 'Ambiente')]
+                            parameters: [choice(name: 'ambiente', choices: 'production\ntest\ndev', description: 'Ambiente')]
                 }
             } 
         }
@@ -18,9 +18,9 @@ pipeline {
             steps {
                 script {
                     if (env.RELEASE_TYPE == 'prod') {
-                        env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://bucket-frontend-builded-versions/ | awk '{print \$2}' | sed 's/.\$//' |grep 'release' | tail -5", returnStdout: true).trim()
+                        env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://devops-frontend-builded-images-repo/ | awk '{print \$2}' | sed 's/.\$//' |grep 'release' | tail -5", returnStdout: true).trim()
                     }  else {
-                        env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://bucket-frontend-builded-versions/ | awk '{print \$2}' | sed 's/.\$//'", returnStdout: true).trim()
+                        env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://devops-frontend-builded-images-repo/ | awk '{print \$2}' | sed 's/.\$//'", returnStdout: true).trim()
                     }
                 }
             }
@@ -38,13 +38,13 @@ pipeline {
                 sh "rm -rf release-*"
                 sh "rm -rf test-*"
                 sh "mkdir ${env.IMAGE_DEPLOY}"
-                sh "aws s3 sync s3://bucket-frontend-builded-versions/${env.IMAGE_DEPLOY} ./${env.IMAGE_DEPLOY}"   
+                sh "aws s3 sync s3://devops-frontend-builded-images-repo/${env.IMAGE_DEPLOY} ./${env.IMAGE_DEPLOY}"   
             }
         }
         stage("Subir a S3") {
             steps{
                 sh "cd ${env.IMAGE_DEPLOY}"
-                sh "aws s3 cp ${env.IMAGE_DEPLOY} s3://bucket-devops-frontend-${env.RELEASE_TYPE} --recursive"
+                sh "aws s3 cp ${env.IMAGE_DEPLOY} s3://bucket-frontend-devops-${env.RELEASE_TYPE} --recursive"
             }
         }
     }
