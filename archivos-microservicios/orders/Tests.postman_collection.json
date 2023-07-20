@@ -1,0 +1,49 @@
+{
+	"info": {
+		"_postman_id": "a08a6894-cffb-4717-9adf-fa2bac256ad6",
+		"name": "TestsOrders",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CreateOrder",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Estado 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    \"123\", \"321\", \"111\"\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8180/orders",
+					"host": [
+						"localhost"
+					],
+					"port": "8180",
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

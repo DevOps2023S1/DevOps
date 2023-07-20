@@ -1,0 +1,11 @@
+version: "3"
+services:
+  products:
+    image: devops/products-service:latest
+    container_name: products-service
+    ports:
+      - "8181:8080"
+    networks:
+      - net
+networks:
+  net:

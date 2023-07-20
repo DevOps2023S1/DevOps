@@ -1,0 +1,11 @@
+version: "3"
+services:
+  shipping:
+    image: devops/shipping-service:latest
+    container_name: shipping-service
+    ports:
+      - "8181:8080"
+    networks:
+      - net
+networks:
+  net:
