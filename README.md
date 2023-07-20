@@ -2,7 +2,8 @@
 ## Unversidad ORT Uruguay - Facultad de Ingeniería - Escuela de tecnología
 #### Realizado por Adrián Rodríguez [241708] y Gastón Sanguinetti [187831]
 ---
-Estructura del repo  
+  
+Contenido:  
   - [Descripción del problema](#descripción-del-problema)
   - [Objetivo](#objetivo)
   - [Git](#git)
