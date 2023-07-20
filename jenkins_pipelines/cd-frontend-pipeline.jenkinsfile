@@ -17,7 +17,7 @@ pipeline {
         stage('Obtener imagenes disponibles') {
             steps {
                 script {
-                    if (env.RELEASE_TYPE == 'prod') {
+                    if (env.RELEASE_TYPE == 'production') {
                         env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://devops-frontend-builded-images-repo/ | awk '{print \$2}' | sed 's/.\$//' |grep 'release' | tail -5", returnStdout: true).trim()
                     }  else {
                         env.AVAILABLE_VERSIONS = sh(script: "aws s3 ls s3://devops-frontend-builded-images-repo/ | awk '{print \$2}' | sed 's/.\$//'", returnStdout: true).trim()

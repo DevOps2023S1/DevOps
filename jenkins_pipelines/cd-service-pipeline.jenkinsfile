@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         serviceName = "${service_name}"
-        executionRole = "arn:aws:iam::279941515831:role/LabRole"
-        ecrRepoURL = "279941515831.dkr.ecr.us-east-1.amazonaws.com"
+        executionRole = "arn:aws:iam::621942369834:role/LabRole"
+        ecrRepoURL = "621942369834.dkr.ecr.us-east-1.amazonaws.com"
     }
 
     stages {
@@ -22,7 +22,7 @@ pipeline {
                     if (env.RELEASE_TYPE == 'prod') {
                         env.AVAILABLE_VERSIONS = sh(script: "aws ecr describe-images --repository-name ${service_name} --query 'sort_by(imageDetails,& imagePushedAt)[*].imageTags' |  sed 's/^-//'| sed 's/^ *//' | sed 's/^-//' | sed 's/^ *//' | grep 'release' | tail -5", returnStdout: true).trim()
                     }  else {
-                        env.AVAILABLE_VERSIONS = sh(script: "aws ecr describe-images --repository-name ${service_name} --query 'sort_by(imageDetails,& imagePushedAt)[*].imageTags' |  sed 's/^-//'| sed 's/^ *//' | sed 's/^-//' | sed 's/^ *//'", returnStdout: true).trim()
+                        env.AVAILABLE_VERSIONS = sh(script: "aws ecr describe-images --repository-name ${service_name} --query 'sort_by(imageDetails,& imagePushedAt)[*].imageTags' |  sed 's/^-//'| sed 's/^ *//' | sed 's/^-//' | sed 's/^ *//' | grep -v 'latest'", returnStdout: true).trim()
                     }
                 }
             }
