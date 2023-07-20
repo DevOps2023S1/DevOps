@@ -1,7 +1,8 @@
 # Obligatorio DevOps - Julio 2023
+## Unversidad ORT Uruguay - Facultad de Ingeniería - Escuela de tecnología
 #### Realizado por Adrián Rodríguez [241708] y Gastón Sanguinetti [187831]
 ---
-
+Estructura del repo  
   - [Descripción del problema](#descripción-del-problema)
   - [Objetivo](#objetivo)
   - [Git](#git)
@@ -21,6 +22,7 @@
       - [Smoke Tests, o tests funcionales básicos](#smoke-tests-o-tests-funcionales-básicos)
   - [Anexo](#anexo)
       - [Tablero de Kanban](#tablero-de-kanban)
+      - [Estructura del repo](#estructura-del-repo)
 
 
 ## Descripción del problema
@@ -100,6 +102,7 @@ A continuación, mostramos de forma más visual, el flujo comentado anteriorment
 ## Pipelines de Jenkins
 Para los ciclos de CI/CD, se optó por utilizar Jenkins como herramienta para este fin.  
 Para nuestro caso, se instaló el servidor Jenkins en una máquina virtual EC2, y se utiliza el mismo servidor Jenkins para el CI/CD de todos los ambientes (test/dev/prod).
+Una vez creada la instancia inicial de Jenkins, se generó una AMI publica (se pueden ver los archivos Terraform para este fin) a modo de tener un backup de toda la configuración y permitir levantar la VM ya configurada con todo en otra organización. 
 
 A continuación, brindamos más información sobre los pipelines.  
 ### Pipelines de CI
@@ -231,3 +234,12 @@ A continuación, mostramos cómo fue evolucionando el tablero a medida que avanz
 ![Trello 3](./documentacion/imagenes/trello-3.jpg)  
 ![Trello 4](./documentacion/imagenes/trello-4.jpg)  
 
+#### Estructura del repo  
+Detallamos a continuación la estructura del repositorio:  
+ - archivos-microservicios: en esta carpeta se encuentran los archivos que fueron agregados a los repositorios de los microservicios para la parte de CI. Se agregaron: Dockerfile (para construir la imagen de Docker), docker-compose.yml para levantar la imagen de docker generada en el pipeline de CI y ejecutar las pruebas de Postman y por úlitmo, Tests.postman_collection.json que contiene la colección de Postman que se ejecuta en el paso de "Test de postman".
+ - documentacion/imagenes: contiene las imágenes usadas en este Readme.
+ - github_actions: contiene los actions que fueron agregados en todos los repos de microservicios y frontend-app que se encargan de disparar acciones para ejecutar el pipeline de CI de Jenkins ante un push a master o crear/actualizar un Pull Request.
+ - jenkins_pipelines: contiene todos los pipelines que se encuentran en la VM de Jenkins para llevar a cabo los ciclos CI/CD.
+ - jenkins-script: script Bash auxiliar usado en los pipelines de CI para administrar las versiones de las imágenes creadas. 
+ - terraform_files: contiene adentro las carpetas test/dev/produccion/commons que se encargan de crear la IaC en AWS usando como herramienta Terraform. En la carpeta Commons está aquella infraestructura que se usa en común para todos los ambientes (ejemplo: repo de imagágenes ECR, VM Jenkins, S3 repo de imágenes de frontend).
+ - README.md: archivo en formato Markdown con la documentación del proyecto. 
