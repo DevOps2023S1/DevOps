@@ -187,3 +187,18 @@ variable "payment_container_name" {
   description = "Payment container name"
   type        = string
 }
+
+variable "vpc_id" {
+  description = "VPC ID"
+  type        = string
+}
+
+variable "networks_ids" {
+  description = "Networks ids"
+  type        = list
+}
+
+variable "execution_role" {
+  description = "Execution role para las task definition"
+  type        = string
+}
